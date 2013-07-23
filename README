@@ -1,3 +1,8 @@
+This is a fork from the original qemu sources.
+
+The goal is adding support of Atmel SAM3N controller series to that great Emulator.
+
+
 Read the documentation in qemu-doc.html or on http://wiki.qemu.org
 
 - QEMU team
