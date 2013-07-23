@@ -8,10 +8,26 @@
  */
 
 #include "hw/boards.h"
+#include "exec/address-spaces.h"
+#include "hw/arm/arm.h"
 
 static void sam3n_init(const char *kernel_filename, const char *cpu_model)
 {
-   fprintf(stderr, "sam3n_init:\n");
+    qemu_irq *pic;
+    int      sram_size;
+    int      flash_size;
+
+    sram_size  = 8;  /* in kB? */
+    flash_size = 32; /* in kB? */
+
+    MemoryRegion *address_space_mem = get_system_memory();
+
+    pic = armv7m_init(address_space_mem,
+                     flash_size, sram_size, kernel_filename, cpu_model);
+
+    pic = pic; // to prevent compiler complaints
+
+    fprintf(stderr, "sam3n_init:\n");
 }
 
 static void sam3n1b_init(QEMUMachineInitArgs *args)
