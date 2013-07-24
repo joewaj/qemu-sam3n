@@ -11,14 +11,40 @@
 #include "exec/address-spaces.h"
 #include "hw/arm/arm.h"
 
+
+static uint64_t int_per_read(void *opaque, hwaddr offset,
+                          unsigned size)
+{
+//    ssys_state *s = (ssys_state *)opaque;
+
+    fprintf(stderr, "sam3n int_per_read: %ld\n", (long) offset);
+
+    return 0;
+}
+
+static void int_per_write(void *opaque, hwaddr offset,
+                       uint64_t value, unsigned size)
+{
+   fprintf(stderr, "sam3n int_per_write: %ld\n", (long) offset);
+}
+
+static const MemoryRegionOps int_peripheral_ops = {
+    .read = int_per_read,
+    .write = int_per_write,
+    .endianness = DEVICE_NATIVE_ENDIAN,
+};
+
 static void sam3n_init(const char *kernel_filename, const char *cpu_model)
 {
-    qemu_irq *pic;
-    int      sram_size;
-    int      flash_size;
+    qemu_irq      *pic;
+    int           sram_size;
+    int           flash_size;
+    MemoryRegion  IoMem;
 
     sram_size  = 8;  /* in kB? */
     flash_size = 32; /* in kB? */
+
+    fprintf(stderr, "sam3n_init: 1\n");
 
     MemoryRegion *address_space_mem = get_system_memory();
 
@@ -27,7 +53,11 @@ static void sam3n_init(const char *kernel_filename, const char *cpu_model)
 
     pic = pic; // to prevent compiler complaints
 
-    fprintf(stderr, "sam3n_init:\n");
+    // Create and initialze the internal peripherals
+    memory_region_init_io(&IoMem, NULL, &int_peripheral_ops, NULL, "peripheral", 0x00100000);
+    memory_region_add_subregion(get_system_memory(), 0x40000000, &IoMem);
+
+    fprintf(stderr, "sam3n_init: 2\n");
 }
 
 static void sam3n1b_init(QEMUMachineInitArgs *args)
